@@ -11,40 +11,47 @@ const Home = () => {
     //console.log(e.target.files[0])
     setSelect(e.target.files[0])
   }
-  const handleSubmit = async (event)=>{
-    event.preventDefault()
-    if(!select){
-      setConvert("Please select a file")
-      return
-    }
-    const formData = new FormData()
-    formData.append('file',select)
-    try {
-     const response = await axios.post("https://convoapp-817f.onrender.com/convertFile",formData,{ // axios se frontend me backend ke api ko call krliya aur formdata s data utha liya
-        responseType:"blob", // response ka type binary object rkh diya 
-      })
-      const url = window.URL.createObjectURL(new Blob([response.data]) )
-    //  console.log(url)
-      const link =document.createElement('a')
-     // console.log(link)
-      link.href=url
-    //  console.log(link)
-      link.setAttribute("download",select.name.replace(/\.[^/.]+$/,"")+".pdf")  // ab yha s convert krke download kra lenge
-    //  console.log(link)
-      document.body.appendChild(link)
-    //  console.log(link)
-      link.click()
-      link.parentNode.removeChild(link)
-      setSelect(null)
-      setDownloadError("")
-      setConvert("File Converted Successfully")
-    } catch (error) {
-      console.log(error)
-      if(error.response && error.response.status==400)
-      setDownloadError("Error occured:",error.response.data.message)
-     else setConvert("")
+  const handleSubmit = async (event) => {
+  event.preventDefault();
+  if (!select) {
+    setConvert("Please select a file");
+    return;
+  }
+  setConvert("Converting...");
+  setDownloadError("");
+  const formData = new FormData();
+  formData.append('file', select);
+
+  try {
+    const response = await axios.post(
+      "https://convoapp-817f.onrender.com/convertFile",
+      formData
+    );
+    const pdfUrl = response.data.pdfUrl;
+    if (!pdfUrl) throw new Error("No PDF URL returned");
+
+    // Download PDF by creating a temporary link
+    const link = document.createElement('a');
+    link.href = pdfUrl;
+    link.setAttribute('download', select.name.replace(/\.[^/.]+$/, "") + '.pdf');
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    setSelect(null);
+    setConvert("File Converted Successfully");
+    setDownloadError("");
+  } catch (error) {
+    console.error(error);
+    setConvert("");
+    if (error.response && error.response.status === 400) {
+      setDownloadError("Error occurred: " + error.response.data.message);
+    } else {
+      setDownloadError("Conversion failed. Please try again.");
     }
   }
+};
+
   return (
     <>
       <div className='max-w-screen-2xl mx-auto container px-4 md:px-40'>
