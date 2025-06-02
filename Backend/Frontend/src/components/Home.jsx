@@ -20,7 +20,7 @@ const Home = () => {
     const formData = new FormData()
     formData.append('file',select)
     try {
-     const response = await axios.post("https://convo-fw12.onrender.com",formData,{ // axios se frontend me backend ke api ko call krliya aur formdata s data utha liya
+     const response = await axios.post("https://convo-fw12.onrender.com/convertFile",formData,{ // axios se frontend me backend ke api ko call krliya aur formdata s data utha liya
         responseType:"blob", // response ka type binary object rkh diya 
       })
       const url = window.URL.createObjectURL(new Blob([response.data]) )
